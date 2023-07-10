@@ -13,6 +13,7 @@ import torch.utils.data  # noqa
 import torchvision
 import torchvision.transforms as T
 
+import seaborn as sns
 
 from sklearn.preprocessing import MinMaxScaler
 

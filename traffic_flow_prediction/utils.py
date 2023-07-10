@@ -1,4 +1,5 @@
 import os
+import glob
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -61,6 +62,35 @@ class MLP(nn.Module):
             nn.LazyLinear(128),
             nn.LazyBatchNorm1d(),
             nn.Sigmoid(),
+
+            nn.LazyLinear(32),
+            nn.LazyBatchNorm1d(),
+            nn.Sigmoid(),
+
+            nn.LazyLinear(1),
+            nn.Sigmoid()
+        )
+
+
+class CNN(nn.Module):
+
+    def forward(self, x: torch.Tensor):
+        return self.model(x)
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.model = nn.Sequential(
+            nn.Unflatten(1, (1, -1)),
+
+            nn.Conv1d(1, 64, 4, 2, 1),
+            nn.LazyBatchNorm1d(),
+            nn.Sigmoid(),
+
+            nn.Conv1d(64, 16, 4, 2, 1),
+            nn.LazyBatchNorm1d(),
+            nn.Sigmoid(),
+
+            nn.Flatten(),
 
             nn.LazyLinear(32),
             nn.LazyBatchNorm1d(),

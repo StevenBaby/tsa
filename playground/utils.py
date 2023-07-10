@@ -142,11 +142,44 @@ class CNN(nn.Module):
         )
 
 
+class LSTM(nn.Module):
+
+    def forward(self, x: torch.Tensor):
+        y = self.input(x)
+        y, _ = self.rnn(y, None)
+        y = self.output(y)
+        return y
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.input = nn.Sequential(
+            nn.LazyLinear(16),
+            nn.LazyBatchNorm1d(),
+            nn.Sigmoid(),
+        )
+
+        self.rnn = nn.LSTM(
+            input_size=16,
+            hidden_size=32,
+            num_layers=1,
+            dropout=0.0,
+            batch_first=True,
+        )
+
+        self.output = nn.Sequential(
+            nn.LazyLinear(1),
+            nn.Sigmoid()
+        )
+
+
 def load_models(*names):
     models = {
         'mlp': MLP,
         'cnn': CNN,
+        'lstm': LSTM,
     }
+
     if not names:
         names = models.keys()
 

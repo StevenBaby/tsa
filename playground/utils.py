@@ -76,7 +76,7 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
 
 class SineDataset(TimeSeriesDataset):
 
-    def __init__(self, lags, train=True) -> None:
+    def __init__(self, lags, train=True, len=None) -> None:
         if train:
             filename = 'datasets/sine.train.csv'
         else:
@@ -85,7 +85,7 @@ class SineDataset(TimeSeriesDataset):
         if not os.path.exists(filename):
             data = sine_dataset()
             save_sine_dataset(data, filename)
-        data = load_sine_dataset(filename).values
+        data = load_sine_dataset(filename).values[:len]
         self.scaler = MinMaxScaler(feature_range=(0.01, 0.99))
         data = self.scaler.fit_transform(data.reshape(-1, 1)).reshape(-1)
 

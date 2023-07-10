@@ -42,6 +42,20 @@ def save_sine_dataset(dataset, filename):
     dataset.to_csv(filename, index=False)
 
 
+def load_model(model: nn.Module, filename):
+    model.load_state_dict(torch.load(filename))
+    model.eval()
+    return model
+
+
+def save_model(model: nn.Module, filename):
+    dirname = os.path.dirname(filename)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    torch.save(model.state_dict(), filename)
+
+
 class TimeSeriesDataset(torch.utils.data.Dataset):
 
     def __init__(self, data, lags) -> None:
@@ -76,3 +90,24 @@ class SineDataset(TimeSeriesDataset):
         data = self.scaler.fit_transform(data.reshape(-1, 1)).reshape(-1)
 
         super().__init__(data, lags)
+
+
+class MLP(nn.Module):
+
+    def forward(self, x: torch.Tensor):
+        return self.model(x)
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.model = nn.Sequential(
+            nn.LazyLinear(128),
+            nn.LazyBatchNorm1d(),
+            nn.Sigmoid(),
+
+            nn.LazyLinear(32),
+            nn.LazyBatchNorm1d(),
+            nn.Sigmoid(),
+
+            nn.LazyLinear(1),
+            nn.Sigmoid()
+        )

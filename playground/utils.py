@@ -19,6 +19,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn import metrics
 
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from statsmodels.tsa.arima.model import ARIMA as ARIMAModel
 
 
 def sine_dataset(count=10000):
@@ -195,6 +196,27 @@ class ETS(object):
                 damped_trend=True,
                 use_boxcox=True,
             ).fit(optimized=True)
+
+            y = model.predict(len(history), len(history))
+            pred.append(y[0])
+
+        return torch.nan_to_num_(torch.tensor(pred), 0.0)
+
+
+class ARIMA(object):
+
+    def eval(self):
+        pass
+
+    def forward(self, x: torch.Tensor):
+        pred = []
+
+        for history in x:
+
+            model = ARIMAModel(
+                history.detach().cpu().numpy(),
+                order=(1, 1, 1)
+            ).fit()
 
             y = model.predict(len(history), len(history))
             pred.append(y[0])

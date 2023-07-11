@@ -152,7 +152,7 @@ class LSTM(nn.Module):
         y = self.input(x)
         y, _ = self.rnn(y, None)
         y = self.output(y)
-        return y
+        return y.reshape(-1)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

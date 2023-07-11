@@ -12,6 +12,7 @@ import torch.utils.data  # noqa
 import torchvision
 import torchvision.transforms as T
 
+import seaborn as sns
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import metrics
@@ -95,7 +96,8 @@ class SineDataset(TimeSeriesDataset):
 class MLP(nn.Module):
 
     def forward(self, x: torch.Tensor):
-        return self.model(x)
+        y = self.model(x)
+        return y.reshape(-1)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

@@ -234,3 +234,35 @@ def fit(model, dataset, criterion, optimizer, epoch, batch_size, device, shuffle
                     bar.set_postfix(loss=f"{loss.item():0.6}")
 
     return losses
+
+
+def test(models, dataset, batch_size, device, progress=True):
+    dataloader = torch.utils.data.DataLoader(
+        dataset=dataset,
+        batch_size=batch_size,
+        drop_last=True,
+        generator=torch.Generator(device=device),
+        shuffle=False,
+    )
+
+    if progress:
+        dataloader = tqdm(dataloader)
+
+    preds = []
+    for model in models:
+        model.eval()
+        preds.append([])
+
+    real = []
+
+    for x, t in dataloader:
+        real.append(t)
+        for i, model in enumerate(models):
+            y = model.forward(x)
+            preds[i].append(y)
+
+    real = torch.cat(real)
+    for i, pred in enumerate(preds):
+        preds[i] = torch.cat(pred)
+
+    return real, preds

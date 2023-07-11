@@ -162,3 +162,35 @@ class GRU(nn.Module):
             nn.LazyLinear(1),
             nn.Sigmoid()
         )
+
+
+class SATT(nn.Module):
+
+    def forward(self, x: torch.Tensor):
+        y = self.input(x)
+
+        m = torch.ones((x.shape[0], x.shape[1], 16))
+
+        y, _ = self.attention(y, y, y)
+
+        y = self.output(y)
+        return y
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.input = nn.Sequential(
+            nn.LazyLinear(16 * 16),
+            nn.LazyBatchNorm1d(),
+            nn.Sigmoid(),
+
+            nn.Unflatten(1, (16, -1))
+        )
+
+        self.attention = nn.MultiheadAttention(16, 8)
+
+        self.output = nn.Sequential(
+            nn.Flatten(),
+            nn.LazyLinear(1),
+            nn.Sigmoid()
+        )

@@ -18,6 +18,8 @@ import seaborn as sns
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import metrics
 
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
 
 def sine_dataset(count=10000):
     x = np.linspace(0, 1000, count)
@@ -177,27 +179,27 @@ class LSTM(nn.Module):
         )
 
 
-def load_models(*names):
-    models = {
-        'mlp': MLP,
-        'cnn': CNN,
-        'lstm': LSTM,
-    }
+class ETS(object):
 
-    if not names:
-        names = models.keys()
+    def eval(self):
+        pass
 
-    ret = {}
-    for name in names:
-        if name not in models:
-            continue
-        cls = models[name]
-        filename = f'models/{name}.pt'
-        if not os.path.exists(filename):
-            continue
-        ret[name] = cls()
-        load_model(ret[name], filename)
-    return ret
+    def forward(self, x: torch.Tensor):
+        pred = []
+
+        for history in x:
+
+            model = ExponentialSmoothing(
+                history.detach().cpu().numpy(),
+                trend='add',
+                damped_trend=True,
+                use_boxcox=True,
+            ).fit(optimized=True)
+
+            y = model.predict(len(history), len(history))
+            pred.append(y[0])
+
+        return torch.nan_to_num_(torch.tensor(pred), 0.0)
 
 
 def fit(model, dataset, criterion, optimizer, epoch, batch_size, device, shuffle, progress=True, step_callback=None):

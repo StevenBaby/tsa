@@ -194,3 +194,43 @@ def load_models(*names):
         ret[name] = cls()
         load_model(ret[name], filename)
     return ret
+
+
+def fit(model, dataset, criterion, optimizer, epoch, batch_size, device, shuffle, progress=True, step_callback=None):
+
+    dataloader = torch.utils.data.DataLoader(
+        dataset=dataset,
+        batch_size=batch_size,
+        drop_last=True,
+        generator=torch.Generator(device=device),
+        shuffle=shuffle,
+    )
+
+    batch = len(dataloader)
+
+    losses = []
+
+    def updater(x, t):
+        y = model.forward(x)
+        loss = criterion(y, t)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        return loss
+
+    if step_callback is None:
+        step_callback = updater
+
+    with tqdm(total=epoch * batch) as bar:
+        for e in range(epoch):
+            for i, (x, t) in enumerate(dataloader):
+
+                loss = step_callback(x, t)
+                losses.append(loss.item())
+
+                if progress:
+                    bar.set_description(f"({e + 1:02}/{epoch}) | ({i + 1:02}/{batch})")
+                    bar.update()
+                    bar.set_postfix(loss=f"{loss.item():0.6}")
+
+    return losses

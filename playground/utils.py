@@ -1,4 +1,5 @@
 import os
+import glob
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -118,7 +119,8 @@ class MLP(nn.Module):
 class CNN(nn.Module):
 
     def forward(self, x: torch.Tensor):
-        return self.model(x)
+        y = self.model(x)
+        return y.reshape(-1)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
